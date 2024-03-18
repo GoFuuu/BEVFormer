@@ -85,6 +85,17 @@ class BEVFormerEncoder(TransformerLayerSequence):
             return ref_2d
 
     # This function must use fp32!!!
+    '''将三维空间中的点投影到二维图像平面。它首先根据点云的范围进行缩放，
+    然后使用 lidar2img 矩阵将点从激光雷达坐标系转换到图像坐标系。
+    这与beverse get_geometry代码不同，它更专注于点的二维投影，
+    并处理与图像相关的变换，例如缩放和裁剪以适应图像坐标系。
+    
+    三维点首先通过lidar2img矩阵变换到相机坐标系中，这一步体现了内参矩阵的影响。
+    然后，通过将这些三维坐标的x和y分量除以z分量来完成透视投影到二维图像平面。
+    这种除法操作是投影过程的简化表示，其中深度值（即z分量）用于归一化坐标，
+    使它们位于相机前方的视图平面上。这里没有直接应用内参矩阵，
+    因为lidar2img矩阵转换已经包含了相应的内参信息。
+    '''
     @force_fp32(apply_to=('reference_points', 'img_metas'))
     def point_sampling(self, reference_points, pc_range,  img_metas):
         # NOTE: close tf32 here.
@@ -98,7 +109,7 @@ class BEVFormerEncoder(TransformerLayerSequence):
         lidar2img = np.asarray(lidar2img)
         lidar2img = reference_points.new_tensor(lidar2img)  # (B, N, 4, 4)
         reference_points = reference_points.clone()
-
+        #调整参考点：将参考点根据点云范围（pc_range）进行缩放，使其适配到实际的物理空间范围。
         reference_points[..., 0:1] = reference_points[..., 0:1] * \
             (pc_range[3] - pc_range[0]) + pc_range[0]
         reference_points[..., 1:2] = reference_points[..., 1:2] * \
@@ -118,11 +129,11 @@ class BEVFormerEncoder(TransformerLayerSequence):
 
         lidar2img = lidar2img.view(
             1, B, num_cam, 1, 4, 4).repeat(D, 1, 1, num_query, 1, 1)
-
+        #矩阵乘法：通过矩阵乘法将雷达坐标系下的参考点转换到相机坐标系。
         reference_points_cam = torch.matmul(lidar2img.to(torch.float32),
                                             reference_points.to(torch.float32)).squeeze(-1)
         eps = 1e-5
-
+        #三维坐标的x和y分量除以z分量来完成透视投影到二维图像平面。这种除法操作是投影过程的简化表示
         bev_mask = (reference_points_cam[..., 2:3] > eps)
         reference_points_cam = reference_points_cam[..., 0:2] / torch.maximum(
             reference_points_cam[..., 2:3], torch.ones_like(reference_points_cam[..., 2:3]) * eps)
