@@ -107,7 +107,7 @@ class DetectionTransformerDecoder(TransformerLayerSequence):
                 **kwargs)
             #permute后 torch.Size([1, 900, 256])
             output = output.permute(1, 0, 2)
-
+            
             if reg_branches is not None:
                 tmp = reg_branches[lid](output)
 
