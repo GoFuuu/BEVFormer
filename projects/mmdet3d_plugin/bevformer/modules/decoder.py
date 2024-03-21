@@ -90,16 +90,22 @@ class DetectionTransformerDecoder(TransformerLayerSequence):
         output = query
         intermediate = []
         intermediate_reference_points = []
+        #在父类配置了self_attn cross_attn 到transformerlayer
+        #每个layer都是一个block
+        #只用关注self_attn cross_attn两个模块 其他的ffn norm都是默认的
+        num_layer = 0
         for lid, layer in enumerate(self.layers):
-
+            num_layer += 1
             reference_points_input = reference_points[..., :2].unsqueeze(
                 2)  # BS NUM_QUERY NUM_LEVEL 2
+            #output torch.Size([900,1,256])
             output = layer(
                 output,
                 *args,
                 reference_points=reference_points_input,
                 key_padding_mask=key_padding_mask,
                 **kwargs)
+            #permute后 torch.Size([1, 900, 256])
             output = output.permute(1, 0, 2)
 
             if reg_branches is not None:
@@ -116,7 +122,7 @@ class DetectionTransformerDecoder(TransformerLayerSequence):
                 new_reference_points = new_reference_points.sigmoid()
 
                 reference_points = new_reference_points.detach()
-
+            #torch.Size([900, 1, 256])
             output = output.permute(1, 0, 2)
             if self.return_intermediate:
                 intermediate.append(output)

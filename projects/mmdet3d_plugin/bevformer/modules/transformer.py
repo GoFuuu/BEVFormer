@@ -265,13 +265,18 @@ class PerceptionTransformer(BaseModule):
         query_pos = query_pos.unsqueeze(0).expand(bs, -1, -1)
         query = query.unsqueeze(0).expand(bs, -1, -1)
         reference_points = self.reference_points(query_pos)
+        #激活层 通过query通过mlp得到初始reference_points
         reference_points = reference_points.sigmoid()
         init_reference_out = reference_points
 
+        #query torch.Size([900, 1, 256])
         query = query.permute(1, 0, 2)
+        #query_pos torch.Size([900, 1, 256])
         query_pos = query_pos.permute(1, 0, 2)
+        #bev_embed torch.Size([2500, 1, 256]) 50*50,b,embed_dims
         bev_embed = bev_embed.permute(1, 0, 2)
-
+        
+        
         inter_states, inter_references = self.decoder(
             query=query,
             key=None,

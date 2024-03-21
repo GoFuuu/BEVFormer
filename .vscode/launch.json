@@ -28,6 +28,8 @@
             },
             "console": "integratedTerminal",
             "stopOnEntry": false,
+            "justMyCode": false,
+            "purpose": ["debug-in-terminal"],
         }
         ,
         {
@@ -53,6 +55,8 @@
             },
             "console": "integratedTerminal",
             "stopOnEntry": false,
+            "justMyCode": false,
+            "purpose": ["debug-in-terminal"],
         }
     ]
 }

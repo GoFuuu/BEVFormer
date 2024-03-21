@@ -92,9 +92,12 @@ class BEVFormerHead(DETRHead):
             self.as_two_stage else self.transformer.decoder.num_layers
 
         if self.with_box_refine:
+            #self.reg_branches 就会包含 num_pred 个 reg_branch 的深度复制，
+            # 它们具有相同的结构，但不共享参数。
             self.cls_branches = _get_clones(fc_cls, num_pred)
             self.reg_branches = _get_clones(reg_branch, num_pred)
         else:
+            #这些 reg_branch 实际上是同一个模块，它们共享相同的参数。
             self.cls_branches = nn.ModuleList(
                 [fc_cls for _ in range(num_pred)])
             self.reg_branches = nn.ModuleList(
@@ -162,8 +165,8 @@ class BEVFormerHead(DETRHead):
                 grid_length=(self.real_h / self.bev_h,
                              self.real_w / self.bev_w),
                 bev_pos=bev_pos,
-                reg_branches=self.reg_branches if self.with_box_refine else None,  # noqa:E501
-                cls_branches=self.cls_branches if self.as_two_stage else None,
+                reg_branches=self.reg_branches if self.with_box_refine else None,  #true noqa:E501
+                cls_branches=self.cls_branches if self.as_two_stage else None, # none
                 img_metas=img_metas,
                 prev_bev=prev_bev
         )
