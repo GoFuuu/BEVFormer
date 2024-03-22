@@ -91,7 +91,7 @@ class BEVFormerHead(DETRHead):
         num_pred = (self.transformer.decoder.num_layers + 1) if \
             self.as_two_stage else self.transformer.decoder.num_layers
 
-        if self.with_box_refine:
+        if self.with_box_refine: #true
             #self.reg_branches 就会包含 num_pred 个 reg_branch 的深度复制，
             # 它们具有相同的结构，但不共享参数。
             self.cls_branches = _get_clones(fc_cls, num_pred)
@@ -172,6 +172,7 @@ class BEVFormerHead(DETRHead):
         )
 
         bev_embed, hs, init_reference, inter_references = outputs
+        #hs ：hide state torch.Size([6, 1, 900, 256])
         hs = hs.permute(0, 2, 1, 3)
         outputs_classes = []
         outputs_coords = []
@@ -185,6 +186,20 @@ class BEVFormerHead(DETRHead):
             tmp = self.reg_branches[lvl](hs[lvl])
 
             # TODO: check the shape of reference
+            #tmp torch.Size([1, 900, 10])
+            '''3 parameters (l; w; h) for the scale ofeach box, 
+            3 parameters (xo; yo; zo) for the center location, 
+            2parameters (cos(θ), sin(θ)) for object’s yaw θ, 
+            2 parameters(vx; vy) for the velocity
+            [xc，yc，w，l，zc，h，rot.sin()，rot.cos()，vx，vy]；
+            [预测框中心位置的x方向偏移，预测框中心位置的y方向偏移，
+            预测框的宽，预测框的长，
+            预测框中心位置的z方向偏移，预测框的高，旋转角的正弦值，
+            旋转角的余弦值，x方向速度，y方向速度]
+            ，对每一个 decoder 输出的 tmp（代表目标框的参数）
+            加上 decoder 前的 reference（参考值）
+            可能是为了引入更多的信息和上下文，
+            以改善目标框参数的预测精度和准确性'''
             assert reference.shape[-1] == 3
             tmp[..., 0:2] += reference[..., 0:2]
             tmp[..., 0:2] = tmp[..., 0:2].sigmoid()
