@@ -82,6 +82,8 @@ class PerceptionTransformer(BaseModule):
         )
         if self.can_bus_norm:
             self.can_bus_mlp.add_module('norm', nn.LayerNorm(self.embed_dims))
+        self.past_decoder_output = torch.normal(0, 1, size=(900, 1,256))  
+        self.query_concat = nn.Linear(512, 256)
 
     def init_weights(self):
         """Initialize the transformer weights."""
@@ -267,6 +269,7 @@ class PerceptionTransformer(BaseModule):
         reference_points = self.reference_points(query_pos)
         #激活层 通过query通过mlp得到初始reference_points
         reference_points = reference_points.sigmoid()
+        #reference_points torch.Size([900, 1, 3])
         init_reference_out = reference_points
 
         #query torch.Size([900, 1, 256])
@@ -276,13 +279,17 @@ class PerceptionTransformer(BaseModule):
         #bev_embed torch.Size([2500, 1, 256]) 50*50,b,embed_dims
         bev_embed = bev_embed.permute(1, 0, 2)
         
-        
-        inter_states, inter_references = self.decoder(
+        past_decoder_output = self.past_decoder_output.to(query.device)
+        query_cat = torch.cat([query, past_decoder_output], dim=-1) 
+        query = self.query_concat(query_cat)
+        #query_pos_cat = torch.cat([query_pos, query_pos], dim=-1)
+        #reference_points_cat = torch.cat([reference_points, reference_points], dim=-1)
+        inter_states, inter_references , self.past_decoder_output= self.decoder(
             query=query,
             key=None,
             value=bev_embed,
             query_pos=query_pos,
-            reference_points=reference_points,
+            reference_points=init_reference_out,
             reg_branches=reg_branches,
             cls_branches=cls_branches,
             spatial_shapes=torch.tensor([[bev_h, bev_w]], device=query.device),

@@ -93,9 +93,8 @@ class DetectionTransformerDecoder(TransformerLayerSequence):
         #在父类配置了self_attn cross_attn 到transformerlayer
         #每个layer都是一个block
         #只用关注self_attn cross_attn两个模块 其他的ffn norm都是默认的
-        num_layer = 0
+        decoder_output = None
         for lid, layer in enumerate(self.layers):
-            num_layer += 1
             reference_points_input = reference_points[..., :2].unsqueeze(
                 2)  # BS NUM_QUERY NUM_LEVEL 2
             #output torch.Size([900,1,256])
@@ -105,6 +104,9 @@ class DetectionTransformerDecoder(TransformerLayerSequence):
                 reference_points=reference_points_input,
                 key_padding_mask=key_padding_mask,
                 **kwargs)
+            #提取decoder的输出 ([900,1,256])
+            if lid == 5:
+                decoder_output = output.clone().detach()
             #permute后 torch.Size([1, 900, 256])
             output = output.permute(1, 0, 2)
             
@@ -130,9 +132,9 @@ class DetectionTransformerDecoder(TransformerLayerSequence):
 
         if self.return_intermediate:
             return torch.stack(intermediate), torch.stack(
-                intermediate_reference_points)
+                intermediate_reference_points) ,decoder_output
 
-        return output, reference_points
+        return output, reference_points 
 
 
 @ATTENTION.register_module()
