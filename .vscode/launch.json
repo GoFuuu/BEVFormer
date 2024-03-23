@@ -15,7 +15,7 @@
             "module": "torch.distributed.launch",
             "args": [
                 "--nproc_per_node=1",
-                "--master_port=28509",
+                "--master_port=28400",
                 "./tools/train.py",
                 "./projects/configs/bevformer/bevformer_tiny.py",
                 "--launcher=pytorch",
