@@ -66,6 +66,8 @@ class PerceptionTransformer(BaseModule):
         self.two_stage_num_proposals = two_stage_num_proposals
         self.init_layers()
         self.rotate_center = rotate_center
+        
+        self.first_call = [True]
 
     def init_layers(self):
         """Initialize layers of the Detr3DTransformer."""
@@ -82,7 +84,8 @@ class PerceptionTransformer(BaseModule):
         )
         if self.can_bus_norm:
             self.can_bus_mlp.add_module('norm', nn.LayerNorm(self.embed_dims))
-        self.past_decoder_output = torch.normal(0, 1, size=(900, 1,256))  
+        self.past_decoder_output = torch.normal(0, 1, size=(900, 1,256))
+        #self.past_decoder_output = None  
         self.query_concat = nn.Sequential(
             nn.Linear(512, 256),
             nn.ReLU(inplace=True),
@@ -282,10 +285,18 @@ class PerceptionTransformer(BaseModule):
         query_pos = query_pos.permute(1, 0, 2)
         #bev_embed torch.Size([2500, 1, 256]) 50*50,b,embed_dims
         bev_embed = bev_embed.permute(1, 0, 2)
-        
+
+            
+        if self.first_call[0]:
+            query_cat = torch.cat([query, query], dim=-1) 
+            self.first_call[0] = False  # 将标记设置为 False，表示已经执行过初始化操作了
+        else:
         #concat past_decoder_output to query 
-        past_decoder_output = self.past_decoder_output.to(query.device)
-        query_cat = torch.cat([query, past_decoder_output], dim=-1) 
+            if query.shape[0] != self.past_decoder_output.shape[0]:
+                self.past_decoder_output = self.past_decoder_output[:,-query.shape[1]:,:]
+            else:
+                query_cat = torch.cat([query, self.past_decoder_output], dim=-1) 
+        
         query = self.query_concat(query_cat)
 
         inter_states, inter_references , self.past_decoder_output= self.decoder(
