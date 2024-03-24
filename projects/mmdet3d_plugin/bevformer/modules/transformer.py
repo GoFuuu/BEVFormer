@@ -83,7 +83,11 @@ class PerceptionTransformer(BaseModule):
         if self.can_bus_norm:
             self.can_bus_mlp.add_module('norm', nn.LayerNorm(self.embed_dims))
         self.past_decoder_output = torch.normal(0, 1, size=(900, 1,256))  
-        self.query_concat = nn.Linear(512, 256)
+        self.query_concat = nn.Sequential(
+            nn.Linear(512, 256),
+            nn.ReLU(inplace=True),
+        )
+        
 
     def init_weights(self):
         """Initialize the transformer weights."""
