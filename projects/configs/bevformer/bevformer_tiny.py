@@ -261,7 +261,7 @@ evaluation = dict(interval=6, pipeline=test_pipeline)
 runner = dict(type='EpochBasedRunner', max_epochs=total_epochs)
 
 log_config = dict(
-    interval=300,
+    interval=30,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(type='TensorboardLoggerHook')
