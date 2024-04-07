@@ -288,12 +288,13 @@ class PerceptionTransformer(BaseModule):
             self.first_call[0] = False  # 将标记设置为 False，表示已经执行过初始化操作了
         else:
         #concat past_decoder_output to query 
+            past_decoder_output = self.past_decoder_output.to(query.device)
             if query.shape[0] != self.past_decoder_output.shape[0]:
                 self.past_decoder_output = self.past_decoder_output[:,-query.shape[1]:,:]
             else:
                 query_cat = torch.cat([query, self.past_decoder_output], dim=0) 
         
-        past_decoder_output = self.past_decoder_output.to(query.device)
+        
         #query_cat torch.Size([1800, 1, 256])
         query_cat = torch.cat([query, past_decoder_output], dim=0) 
         #query = self.query_concat(query_cat)
