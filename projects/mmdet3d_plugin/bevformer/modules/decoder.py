@@ -134,7 +134,7 @@ class DetectionTransformerDecoder(TransformerLayerSequence):
             return torch.stack(intermediate), torch.stack(
                 intermediate_reference_points) ,decoder_output
 
-        return output, reference_points 
+        return output, reference_points ,decoder_output
 
 
 @ATTENTION.register_module()
