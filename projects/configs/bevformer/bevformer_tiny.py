@@ -208,8 +208,8 @@ test_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=1,
-    workers_per_gpu=6,
+    samples_per_gpu=2,
+    workers_per_gpu=8,
     train=dict(
         type=dataset_type,
         data_root=data_root,
@@ -256,15 +256,16 @@ lr_config = dict(
     warmup_ratio=1.0 / 3,
     min_lr_ratio=1e-3)
 total_epochs = 24
-evaluation = dict(interval=6, pipeline=test_pipeline)
+evaluation = dict(interval=24, pipeline=test_pipeline)
 
 runner = dict(type='EpochBasedRunner', max_epochs=total_epochs)
 
 log_config = dict(
-    interval=30,
+    interval=300,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(type='TensorboardLoggerHook')
     ])
 
 checkpoint_config = dict(interval=1)
+find_unused_parameters = False
