@@ -268,3 +268,4 @@ log_config = dict(
     ])
 
 checkpoint_config = dict(interval=1)
+find_unused_parameters = True
