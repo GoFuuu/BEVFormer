@@ -11,6 +11,7 @@ __pycache__/
 build/
 ckpts/
 data/
+visualize/
 ckpts
 data
 test/

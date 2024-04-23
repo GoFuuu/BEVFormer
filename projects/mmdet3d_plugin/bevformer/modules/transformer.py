@@ -259,7 +259,7 @@ class PerceptionTransformer(BaseModule):
             bev_w,
             grid_length=grid_length,
             bev_pos=bev_pos,
-            prev_bev=prev_bev,
+           # prev_bev=prev_bev,
             **kwargs)  # bev_embed shape: bs, bev_h*bev_w, embed_dims
 
         bs = mlvl_feats[0].size(0)
