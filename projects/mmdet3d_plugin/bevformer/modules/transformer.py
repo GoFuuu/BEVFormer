@@ -280,19 +280,19 @@ class PerceptionTransformer(BaseModule):
         #bev_embed torch.Size([2500, 1, 256]) 50*50,b,embed_dims
         bev_embed = bev_embed.permute(1, 0, 2)
         
-        if self.first_call[0]:
-            self.first_call[0] = False  # 将标记设置为 False，表示已经执行过初始化操作了
-            past_decoder_output = query
-        else:
-        #concat past_decoder_output to query 
-            self.past_decoder_output = self.past_decoder_output.to(query.device)
-            if query.shape[1] != self.past_decoder_output.shape[1]:
-                if query.shape[1] < self.past_decoder_output.shape[1]:
-                    self.past_decoder_output = self.past_decoder_output[:,-query.shape[1]:,:]
-                if query.shape[1] > self.past_decoder_output.shape[1]:
-                    #保留原本的self.past_decoder_outpu并将self.past_decoder_outpu的第二维度的最后一个拿出来复制最后使得形状和query一样
-                    self.past_decoder_output = torch.cat([self.past_decoder_output, self.past_decoder_output[:,-1:,:].repeat(1,query.shape[1]-self.past_decoder_output.shape[1],1)], dim=1)
-            past_decoder_output = self.past_decoder_output
+        # if self.first_call[0]:
+        #     self.first_call[0] = False  # 将标记设置为 False，表示已经执行过初始化操作了
+        #     past_decoder_output = query
+        # else:
+        # #concat past_decoder_output to query 
+        #     self.past_decoder_output = self.past_decoder_output.to(query.device)
+        #     if query.shape[1] != self.past_decoder_output.shape[1]:
+        #         if query.shape[1] < self.past_decoder_output.shape[1]:
+        #             self.past_decoder_output = self.past_decoder_output[:,-query.shape[1]:,:]
+        #         if query.shape[1] > self.past_decoder_output.shape[1]:
+        #             #保留原本的self.past_decoder_outpu并将self.past_decoder_outpu的第二维度的最后一个拿出来复制最后使得形状和query一样
+        #             self.past_decoder_output = torch.cat([self.past_decoder_output, self.past_decoder_output[:,-1:,:].repeat(1,query.shape[1]-self.past_decoder_output.shape[1],1)], dim=1)
+        #     past_decoder_output = self.past_decoder_output
 
         # query_cat = torch.cat([query, past_decoder_output], dim=-1) 
         # query = self.query_concat(query_cat)
@@ -300,7 +300,7 @@ class PerceptionTransformer(BaseModule):
         #reference_points_cat = torch.cat([reference_points, reference_points], dim=-1)
         inter_states, inter_references , self.past_decoder_output= self.decoder(
             query=query,
-            past_decoder_output=past_decoder_output,
+            #past_decoder_output=past_decoder_output,
             key=None,
             value=bev_embed,
             query_pos=query_pos,
