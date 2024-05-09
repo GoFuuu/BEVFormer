@@ -305,8 +305,8 @@ class PerceptionTransformer(BaseModule):
             # query_cat = torch.cat([query, query], dim=-1) 
             # query = self.query_concat(query_cat)
             
-            #query_cat = torch.cat([query, query], dim=0)
-            past_decoder_output = query
+            query_cat = torch.cat([query, query], dim=0)
+            past_decoder_output = query_cat
             self.first_call[0] = False  # 将标记设置为 False，表示已经执行过初始化操作了
         else:
         #concat past_decoder_output to query 
@@ -317,9 +317,9 @@ class PerceptionTransformer(BaseModule):
                 if query.shape[1] > self.past_decoder_output.shape[1]:
                     #保留原本的self.past_decoder_outpu并将self.past_decoder_outpu的第二维度的最后一个拿出来复制最后使得形状和query一样
                     self.past_decoder_output = torch.cat([self.past_decoder_output, self.past_decoder_output[:,-1:,:].repeat(1,query.shape[1]-self.past_decoder_output.shape[1],1)], dim=1)
-            query_cat = torch.cat([query, self.past_decoder_output[0:900,...]], dim=-1) 
-            query = self.query_concat(query_cat)
-            #query_cat = torch.cat([query, self.past_decoder_output[0:900,...]], dim=0) 
+            # query_cat = torch.cat([query, self.past_decoder_output[0:900,...]], dim=-1) 
+            # query = self.query_concat(query_cat)
+            query_cat = torch.cat([query, self.past_decoder_output[0:900,...]], dim=0) 
             past_decoder_output = self.past_decoder_output
             
         
@@ -327,16 +327,16 @@ class PerceptionTransformer(BaseModule):
         
         
         
-        #query_pos_cat = torch.cat([query_pos, query_pos], dim=0)
-        #reference_points_cat = torch.cat([reference_points, reference_points], dim=1)
-        #init_reference_out = reference_points_cat
+        query_pos_cat = torch.cat([query_pos, query_pos], dim=0)
+        reference_points_cat = torch.cat([reference_points, reference_points], dim=1)
+        init_reference_out = reference_points_cat
         
         inter_states, inter_references , self.past_decoder_output= self.decoder(
-            query=query,
+            query=query_cat,
             past_decoder_output=past_decoder_output,
             key=None,
             value=bev_embed,
-            query_pos=query_pos,
+            query_pos=query_pos_cat,
             reference_points=init_reference_out,
             reg_branches=reg_branches,
             cls_branches=cls_branches,

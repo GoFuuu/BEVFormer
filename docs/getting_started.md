@@ -28,4 +28,4 @@ and we provide another script to train BEVFormer with FP16.
 
 # Visualization 
 
-see [visual.py](../tools/analysis_tools/visual.py)
+see [visual.py](../tools/analysis_tools/visual.py)`
