@@ -25,9 +25,7 @@ from nuscenes.eval.common.data_classes import EvalBoxes, EvalBox
 from nuscenes.eval.detection.data_classes import DetectionBox
 from nuscenes.eval.detection.utils import category_to_detection_name
 from nuscenes.eval.detection.render import visualize_sample
-
-
-
+import os
 
 cams = ['CAM_FRONT',
  'CAM_FRONT_RIGHT',
@@ -468,10 +466,25 @@ def render_sample_data(
         plt.show()
     plt.close()
 
+# if __name__ == '__main__':
+#     nusc = NuScenes(version='v1.0-trainval', dataroot='./data/nuscenes', verbose=False)
+#     # render_annotation('7603b030b42a4b1caa8c443ccc1a7d52')
+#     bevformer_results = mmcv.load('/home/gofuuu/BEVFormer/test/bevformer_tiny/Thu_Apr_18_13_26_58_2024/pts_bbox/results_nusc.json')
+#     sample_token_list = list(bevformer_results['results'].keys())
+#     for id in range(0, 10):
+#         render_sample_data(sample_token_list[id], pred_data=bevformer_results, out_path=sample_token_list[id])
+
 if __name__ == '__main__':
+    # 数据集路径，使用mini就用v1.0-mini, 使用full就用v1.0-trainval
     nusc = NuScenes(version='v1.0-trainval', dataroot='./data/nuscenes', verbose=True)
-    # render_annotation('7603b030b42a4b1caa8c443ccc1a7d52')
-    bevformer_results = mmcv.load('test/bevformer_base/Thu_Jun__9_16_22_37_2022/pts_bbox/results_nusc.json')
+    # results_nusc.json路径
+    bevformer_results = mmcv.load('/home/gofuuu/BEVFormer/test/bevformer_tiny/Fri_May_10_10_11_51_2024/pts_bbox/results_nusc.json')
+    # 添加result目录
+    save_dir = "result"
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+
     sample_token_list = list(bevformer_results['results'].keys())
+
     for id in range(0, 10):
-        render_sample_data(sample_token_list[id], pred_data=bevformer_results, out_path=sample_token_list[id])
+        render_sample_data(sample_token_list[id], pred_data=bevformer_results, out_path=os.path.join(save_dir, sample_token_list[id]))

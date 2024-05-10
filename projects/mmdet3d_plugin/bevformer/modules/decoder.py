@@ -107,6 +107,7 @@ class DetectionTransformerDecoder(TransformerLayerSequence):
             #提取decoder的输出 ([900,1,256])
             if lid == 5:
                 decoder_output = output.clone().detach()
+                decoder_output = decoder_output[0:900,...]
             #permute后 torch.Size([1, 900, 256])
             output = output.permute(1, 0, 2)
             

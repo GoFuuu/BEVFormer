@@ -16,6 +16,7 @@ data
 test/
 val/
 work_dirs/
+visualize/
 develop-eggs/
 dist/
 downloads/

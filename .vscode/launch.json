@@ -58,5 +58,29 @@
             "justMyCode": false,
             "purpose": ["debug-in-terminal"],
         }
+        ,
+        {
+            "name": "data Debug",
+            "type": "debugpy",
+            "python": "/home/gofuuu/miniconda3/envs/bevformer/bin/python",
+            "request": "launch",
+            "module": "tools/create_data.p",
+            "args": [
+                "--root-path=./data/nuscenes",
+                "--out-dir=./data_info",
+                "--extra-tag=nuscenes",
+                " --version=v1.0",
+                "--canbus=./data",
+
+            ],
+            "cwd": "/home/gofuuu/BEVFormer",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}:${env:PYTHONPATH}"
+            },
+            "console": "integratedTerminal",
+            "stopOnEntry": false,
+            "justMyCode": false,
+            "purpose": ["debug-in-terminal"],
+        }
     ]
 }
